@@ -29,6 +29,7 @@ def main():
 
     ani = animation.FuncAnimation(fig, _update_plot, fargs= (range_list,),
         interval = 1, frames=len(range_list))
+    ani.save("logistic.gif", writer= "imagemagick")
     plt.show()
 
 if __name__ == "__main__":
