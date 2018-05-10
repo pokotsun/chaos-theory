@@ -9,6 +9,7 @@ def logistic(a, initial_value=0.5):
         x.append(a * x[-1] * (1 - x[-1]))
     return x[-200:]
 
+# アニメーション描画関数
 def _update_plot(i, range_list):
     if i == (len(range_list) - 1):
         plt.cla() # 現在描画されているグラフを消去
@@ -29,7 +30,7 @@ def main():
 
     ani = animation.FuncAnimation(fig, _update_plot, fargs= (range_list,),
         interval = 1, frames=len(range_list))
-    ani.save("logistic.gif", writer= "imagemagick")
+    ani.save("logistic.gif", writer="imagemagick")
     plt.show()
 
 if __name__ == "__main__":
