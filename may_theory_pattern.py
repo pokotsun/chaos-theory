@@ -49,9 +49,18 @@ def main():
     #a = 4
     #initial_value = 0.4
     print("y = ax(1-x)のaの値は?")
-    a = float(input())
+    try: 
+        a = float(input())
+    except ValueError:
+        a = 4
+
     print("xの初期値は?")
-    initial_value = float(input())
+    try:
+        initial_value = float(input())
+    except ValueError:
+       initial_value = 0.4 
+
+    print(f"a = {a}, Xの初期値は{initial_value}になりました。")
     #a = sys.argv[1] or 4
     #initial_value = sys.argv[2] or 0.4
     result_list = logistic(a=a, initial_value=initial_value)
@@ -67,8 +76,8 @@ def main():
 
     ani = animation.FuncAnimation(fig, _update_plot, fargs= (logistic_points,),
         interval = 500, frames=len(logistic_points))
-    ani.save(f"logistic_period_a{a}_initvalue{initial_value}.gif", writer="imagemagick")
-    #plt.show()
+    #ani.save(f"logistic_period_a{a}_initvalue{initial_value}.gif", writer="imagemagick")
+    plt.show()
 
 if __name__ == "__main__":
         main()
