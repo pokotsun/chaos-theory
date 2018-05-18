@@ -40,8 +40,6 @@ def IFS_list(initial_x, initial_y):
 def _update_plot(i, ifs_list):
     x, y = next(ifs_list) 
     
-    #print(f"(x,y) = ({x}, {y})")
-
     plt.plot([x], [y], '.', markersize=3)
     plt.xlim([-0.5, 0.5])
     plt.ylim([0, 1])
@@ -53,9 +51,6 @@ def main():
     ani = animation.FuncAnimation(fig, _update_plot, fargs=(ifs_list,), interval=1, frames=30000000)
 
     plt.show()
-
-
-
 
 
 if __name__=='__main__':
