@@ -8,27 +8,46 @@ class HopfieldNetwork():
     def __init__(self, train_list):
         self.dim = len(train_list[0]) # 次元数(覚えさせる画像のピクセル数)
         self.W = np.zeros((self.dim, self.dim)) # 全部0のdim x dim次元配列を生成 重み行列
-        # train_list = [d * 2 - 1 for d in train_list] # (-1, 1)に変換
+        train_list = [d * 2 - 1 for d in train_list] # 重みを計算するために用意
+        # print(f"train_list: {train_list}")
         for t in train_list:
             self.W += np.outer(t, t)
         
-        for i in range(self.dim): # V(i,i)要素は0にする
+        for i in range(self.dim): # W(i,i)要素は0にする
             self.W[i, i] = 0
+        print(f"W: {self.W}")
 
 
 
     # 更新: 入力値のリストに対し、出力値のリストを返す
-    def predict(self, data_list, loop=10):
-        return [self._predict(data, loop=loop) for data in data_list]
+    def predict(self, datas, loop=10):
+        return [self._predict(data, loop=loop) for data in datas]
 
     # 個々の入力値に対してユニットの値が収束するまで
-    # => エネルギーが変化しなくなるまで更新を行う
+    # -> エネルギーが変化しなくなるまで更新を行う
     def _predict(self, data, loop=10):
         e = self.energy(data)
         for i in range(loop):
             # dataとWの内積を取ったあと,
             # dataの符号を取る [5, -5, 4] => [1, -1, 1]とする
-            data = np.sign(self.W.dot(data))
+            #data = np.sign(self.W.dot(data))
+            print(f"not_data: {self.W.dot(data)}")
+            # 自己流
+            data1 = self.W.dot(data)
+            data2 = []
+            for i,d in enumerate(data1):
+                print(f"d = {d}\n元データ: {data[i]}")
+                if d >=0:
+                    if d > 0:
+                        data2.append(1)
+                    else:
+                        data2.append(np.sign(data[i]))
+                else:
+                    data2.append(0)
+
+            data = np.array(data2)
+            # data = np.array([(d + 1)/2 for d in data]) 
+            #print(f"変換後のデータ: {data}")
             e_new = self.energy(data)
             if e == e_new: # 想起結果が変わらなければその時点で値を返す
                 return data
@@ -60,7 +79,9 @@ class HopfieldNetwork():
         assert dim * dim == len(data), "イメージが期待する大きさではありません"
 
         img = (data.reshape(dim, dim) + 1) / 2 # dim x dimの配列に変換したあと(-1,1)を(0,1)に変換
-        # print(f"img:{img}")
+        # img = ((data.reshape(dim, dim) + 1) / 2).astype(int) # dim x dimの配列に変換したあと(-1,1)を(0,1)に変換
+        print(f"img: {img}")
+        # img = data.reshape(dim, dim)
         ax.imshow(img, cmap=cm.Greys_r)
         if with_energy:
             e = np.round(self.energy(data), 1) # 小数点第一位で四捨五入
@@ -77,8 +98,9 @@ def get_corrupted_input(input, corruption_level):
 
     for i,v in enumerate(input):
         if inv[i]:
-            corrupted[i] = -1 * v
-            #corrupted[i] = int(not(v)) 
+            # corrupted[i] = -1 * v
+            corrupted[i] = int(not(v)) 
+    print(f"corrupyted: {corrupted}")
     return corrupted
 
 # 元データ、テストデータ、推測値を描画
@@ -111,17 +133,15 @@ def main():
                   1, 0, 0, 1, 0, 1, 1, 1, 0, 0]),
         np.array([0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
                   1, 0, 0, 0, 0, 0, 1, 1, 1, 0]),
-        #np.array([1,1,1,1,0, 1,0,0,0,0, 1,1,1,1,0, 
-        #        1,0,0,0,0, 1,1,1,1,0]),
         ]
                   
-    data = [d * 2 - 1 for d in data] # (-1, 1)に変換
+    # data = [d * 2 - 1 for d in data] # (-1, 1)に変換
 
     # Hopfield Network インスタンスの作成 と Wの学習 
     hn = HopfieldNetwork(data)
 
-    # 画像に30%のノイズを付与し、テストデータとする
-    test = [get_corrupted_input(d, 0.30) for d in data]
+    # 画像に10%のノイズを付与し、テストデータとする
+    test = [get_corrupted_input(d, 0.20) for d in data]
     #print(f"test_data:{test}")
     # HopField Networkからの出力
     predicted = hn.predict(test)
